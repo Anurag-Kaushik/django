@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload</title>
+    
+    <!-- Bootstrap 4 CDN -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        .navbar {
+            margin-bottom: 30px;
+        }
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        body {
+            background-color: #f7f7f7;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 600px;
+            margin-top: 50px;
+        }
+
+        .upload-container {
+            padding: 30px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-container {
+            margin-top: 20px;
+        }
+
+        .btn-upload {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-upload:hover {
+            background-color: #218838;
+        }
+
+        .progress-bar {
+            transition: width 0.4s ease;
+        }
+
+        #progressText {
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+{% include 'header.html' %}
+<div class="container">
+    <div class="upload-container">
+        <h2 class="text-center mb-4">Upload Your File</h2>
+
+        <!-- Upload Form -->
+        <form id="uploadForm" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="fileInput" class="font-weight-bold">Choose a CSV File</label>
+                <input type="file" name="file" id="fileInput" class="form-control-file" required>
+            </div>
+
+            <button type="submit" class="btn btn-upload btn-block">Upload File</button>
+        </form>
+
+        <!-- Progress Bar and Text -->
+        <div id="progressContainer" class="progress-container" style="display:none;">
+            <h3 class="text-center">Processing...</h3>
+            <div class="progress">
+                <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+            </div>
+            <p id="progressText" class="text-center">Processing...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Handle form submission
+    $('#uploadForm').on('submit', function(e) {
+        e.preventDefault();
+        var formData = new FormData(this);
+        
+        $.ajax({
+            url: '/', // Make sure this points to your upload view
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                var fileId = response.file_id;
+                startProgressCheck(fileId);
+            },
+            error: function() {
+                alert("An error occurred while uploading the file. Please try again.");
+            }
+        });
+    });
+
+    // Start checking progress for the uploaded file
+    function startProgressCheck(fileId) {
+        $('#progressContainer').show();
+        var progressBar = $('#progressBar');
+        var progressText = $('#progressText');
+
+        function updateProgress() {
+            $.get('/progress/' + fileId + '/', function(data) {
+                var progress = (data.processed / data.total) * 100;
+                progressBar.css('width', progress + '%').attr('aria-valuenow', progress).text(Math.round(progress) + '%');
+                progressText.text('Processed ' + data.processed + ' of ' + data.total + ' rows');
+
+                if (progress < 100) {
+                    setTimeout(updateProgress, 1000);  // Update progress every second
+                } else {
+                    progressText.text('Processing Complete!');
+                }
+            });
+        }
+
+        updateProgress();  // Start progress checking
+    }
+</script>
+
+</body>
+</html>

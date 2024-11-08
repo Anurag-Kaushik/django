@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Query Builder</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+{% include 'header.html' %}
+<div class="container mt-5">
+    <h2>Query Builder</h2>
+    
+    <!-- Filters Form -->
+    <form id="filterForm">
+        <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" id="name" class="form-control" placeholder="Filter by Name">
+        </div>
+        <div class="form-group">
+            <label for="address">Address</label>
+            <input type="text" id="address" class="form-control" placeholder="Filter by Address">
+        </div>
+        <button type="submit" class="btn btn-primary">Apply Filters</button>
+    </form>
+
+    <h4 class="mt-4">Filtered Results</h4>
+    <p id="recordCount"></p>
+    <ul id="personList" class="list-group mt-3"></ul>
+</div>
+
+<script>
+    $(document).ready(function() {
+        // Function to call the API and update the list and count
+        function applyFilters() {
+            var name = $('#name').val();
+            var address = $('#address').val();
+
+            $.ajax({
+                url: '/api/query/',
+                type: 'GET',
+                data: {
+                    name: name,
+                    address: address
+                },
+                success: function(response) {
+                    var count = response.count;
+                    var results = response.results;
+                    
+                    // Update record count
+                    $('#recordCount').text(count + ' record(s) found');
+
+                    // Clear previous results
+                    $('#personList').empty();
+
+                    // Render new list
+                    results.forEach(function(person) {
+                        $('#personList').append('<li class="list-group-item">' + person.name + ' - ' + person.address + '</li>');
+                    });
+                },
+                error: function() {
+                    alert("An error occurred while fetching the data.");
+                }
+            });
+        }
+
+        // Apply filters when form is submitted
+        $('#filterForm').submit(function(e) {
+            e.preventDefault();
+            applyFilters();
+        });
+
+        // Optional: Apply filters immediately when typing
+        $('#name, #address').on('input', function() {
+            applyFilters();
+        });
+    });
+</script>
+
+</body>
+</html>

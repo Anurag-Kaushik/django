@@ -1,0 +1,27 @@
+<!-- Navbar with two items: Update Data and Query Builder -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <!-- Logo or Title (optional) -->
+        <a class="navbar-brand" href="#">Catalyst Count Application</a>
+
+        <!-- Toggle button for mobile responsiveness -->
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navbar items -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <!-- Update Data link/button -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'file_upload' %}">Update Data</a>
+                </li>
+
+                <!-- Query Builder link/button -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'query_builder' %}">Query Builder</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
